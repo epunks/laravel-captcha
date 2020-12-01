@@ -59,8 +59,8 @@ class CaptchaServiceProvider extends ServiceProvider
             return;
         }
 
-        Blade::directive(config('bone.captcha.blade'), static function () {
-            return '<?php echo Igoshev\Captcha\Facades\Captcha::getView() ?>';
+        Blade::directive(config('bone.captcha.blade'), static function ($expression) {
+            return '<?php echo Igoshev\Captcha\Facades\Captcha::getView('. $expression .') ?>';
         });
     }
 
@@ -85,7 +85,7 @@ class CaptchaServiceProvider extends ServiceProvider
     protected function registerValidator()
     {
         Validator::extend(config('bone.captcha.validator'), function ($attribute, $value, $parameters, $validator) {
-            return $this->app[Captcha::class]->validate($value);
+            return $this->app[Captcha::class]->validate($value, $attribute);
         }, trans('bone::captcha.incorrect_code'));
     }
 }

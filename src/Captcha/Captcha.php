@@ -5,6 +5,7 @@ namespace Igoshev\Captcha\Captcha;
 use Igoshev\Captcha\Captcha\Storage\StorageInterface;
 use Igoshev\Captcha\Captcha\Generator\GeneratorInterface;
 use Igoshev\Captcha\Captcha\Code\CodeInterface;
+use Illuminate\Support\Facades\Log;
 
 class Captcha
 {
@@ -67,7 +68,7 @@ class Captcha
      *
      * @return mixed
      */
-    public function getImage()
+    public function getImage($captchaId)
     {
         $code = $this->code->generate(
             $this->params['chars'],
@@ -75,6 +76,7 @@ class Captcha
             $this->params['length'][1]
         );
 
+        $this->storage->setKey($captchaId);
         $this->storage->push($code);
 
         return $this->generator->render($code, $this->params);
@@ -86,9 +88,9 @@ class Captcha
      * @param string $code Code.
      * @return bool Returns TRUE on success or FALSE on failure.
      */
-    public function validate($code)
+    public function validate($code, $captchaId)
     {
-        $correctCode = $this->getCorrectCode();
+        $correctCode = $this->getCorrectCode($captchaId);
 
         if (! empty($correctCode)) {
             return mb_strtolower($correctCode) === mb_strtolower($code);
@@ -102,7 +104,7 @@ class Captcha
      *
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function getView()
+    public function getView(String $captchaId)
     {
         $route = route('bone.captcha.image', [], false);
         if (mb_strpos(config('app.url'), 'https://') !== false) {
@@ -110,7 +112,13 @@ class Captcha
         }
         $route .= '?_=' . mt_rand();
 
+        $captchaImage = self::getImage($captchaId);
+
         return view('bone::captcha.image', [
+
+            'captchaImage' => 'data:image/gif;base64,' .base64_encode($captchaImage),
+            'id' => $captchaId,
+
             'route'    => $route,
             'title'    => trans('bone::captcha.update_code'),
             'width'    => config('bone.captcha.width'),
@@ -122,9 +130,10 @@ class Captcha
     /**
      * @return null|string
      */
-    protected function getCorrectCode()
+    protected function getCorrectCode($captchaId)
     {
         if (! isset($this->correctCode)) {
+            $this->storage->setKey($captchaId);
             $this->correctCode = $this->storage->pull();
         }
 

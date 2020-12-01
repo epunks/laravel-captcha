@@ -17,6 +17,22 @@ class SessionStorage implements StorageInterface
     private $key = 'bone_captcha';
 
     /**
+     * @return string
+     */
+    public function getKey(): string
+    {
+        return $this->key;
+    }
+
+    /**
+     * @param string $key
+     */
+    public function setKey(string $key)
+    {
+        $this->key = $key;
+    }
+
+    /**
      * SessionStorage constructor.
      * @param Request $request
      */
