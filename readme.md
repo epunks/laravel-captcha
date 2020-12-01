@@ -62,8 +62,8 @@ class MyController extends Controller
 Showing a Captcha in a View:
 ```html
 ...
-@captcha
-<input type="text" id="captcha" name="captcha" autocomplete="off">
+@captcha('unique-captcha-id')
+<input type="text" name="unique-captcha-id" autocomplete="off">
  ...
 ```
 Check user input during form submission:
