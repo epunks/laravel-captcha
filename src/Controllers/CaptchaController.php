@@ -15,7 +15,12 @@ class CaptchaController extends Controller
      */
     public function image(Request $request)
     {
-        $image = Captcha::getImage($request->get('captcha-id'));
+        $captchaId = $request->get('captcha-id');
+        if(!isset($captchaId)) {
+            abort(400);
+        }
+
+        $image = Captcha::getImage($captchaId);
 
         return response($image)->header('Expires', 'Mon, 26 Jul 1997 05:00:00 GMT')
             ->header('Cache-Control', 'no-store, no-cache, must-revalidate')
@@ -31,6 +36,11 @@ class CaptchaController extends Controller
      */
     public function imageTag(Request $request)
     {
-        return Captcha::getView($request->get('captcha-id'));
+        $captchaId = $request->get('captcha-id');
+        if(!isset($captchaId)) {
+            abort(400);
+        }
+
+        return Captcha::getView($captchaId);
     }
 }
